@@ -1,0 +1,1 @@
+class UnsupportedOSException(osName: String) : Exception("OS $osName is not supported.")

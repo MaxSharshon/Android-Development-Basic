@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Android</string>
+    <string name="increment_counter">Increment Counter</string>
+    <string name="counter_0">Counter: 0</string>
+    <string name="switch_to_fragment">Switch to Fragment</string>
+    <string name="off">OFF</string>
 </resources>

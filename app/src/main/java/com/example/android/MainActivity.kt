@@ -1,82 +1,57 @@
 package com.example.android
 
-import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
+import android.content.IntentFilter
+import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
-import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.android.ui.theme.AndroidTheme
+import android.widget.Button
+import android.widget.TextView
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 
-@Suppress("DEPRECATION")
-class MainActivity : ComponentActivity() {
-    private val cameraPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-        if (isGranted) {
-            openCamera()
-        } else {
-            Toast.makeText(this, "Camera permission denied. Cannot access camera.", Toast.LENGTH_SHORT).show()
-        }
-    }
+class MainActivity : AppCompatActivity() {
+    private var counter: Int = 0
+    private lateinit var counterText: TextView
+
+    private val receiver = CounterReceiver()
+
+    @SuppressLint("SetTextI18n")
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        setContentView(R.layout.activity_main)
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-        } else {
-            openCamera()
+        counterText = findViewById(R.id.counterText)
+        findViewById<Button>(R.id.counterButton).setOnClickListener {
+            counter++
+            counterText.text = counter.toString()
+            val serviceIntent = Intent(this, CounterService::class.java)
+            serviceIntent.putExtra("counter", counter)
+            startService(serviceIntent)
         }
 
-        setContent {
-            AndroidTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
+        val filter = IntentFilter("com.example.android.COUNTER_UPDATE")
+        filter.addCategory(Intent.CATEGORY_DEFAULT)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
         }
-    }
 
-    @SuppressLint("QueryPermissionsNeeded")
-    private fun openCamera() {
-        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        if (cameraIntent.resolveActivity(packageManager) != null) {
-            startActivityForResult(cameraIntent, REQUEST_CODE_CAMERA)
+        findViewById<Button>(R.id.goToSecondActivityButton).setOnClickListener {
+            val intent = Intent(this, SecondActivity::class.java)
+            intent.putExtra("counter", counter)
+            startActivity(intent)
         }
     }
 
-    companion object {
-        private const val REQUEST_CODE_CAMERA = 1001
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(receiver)
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AndroidTheme {
-        Greeting("Android")
+    fun updateCounter(newCounter: Int) {
+        counter = newCounter
+        counterText.text = counter.toString()
     }
 }

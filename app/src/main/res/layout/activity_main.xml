@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/group_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Create Group"
+        android:textSize="18sp" />
+
+    <EditText
+        android:id="@+id/group_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Group Name" />
+
+    <Button
+        android:id="@+id/create_group_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Create Group" />
+
+    <TextView
+        android:id="@+id/student_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add Student"
+        android:textSize="18sp" />
+
+    <EditText
+        android:id="@+id/student_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Name" />
+
+    <EditText
+        android:id="@+id/student_surname"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Surname" />
+
+    <EditText
+        android:id="@+id/student_age"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Age"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/student_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Group ID" />
+
+    <Button
+        android:id="@+id/add_student_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add Student" />
+
+    <Button
+        android:id="@+id/show_students_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Show All Students" />
+
+    <TextView
+        android:id="@+id/student_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Student List:"
+        android:textSize="18sp"
+        android:layout_marginTop="16dp" />
+</LinearLayout>

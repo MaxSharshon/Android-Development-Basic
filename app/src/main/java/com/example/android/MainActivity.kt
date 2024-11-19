@@ -1,82 +1,64 @@
 package com.example.android
 
-import android.Manifest
-import android.annotation.SuppressLint
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
-import android.provider.MediaStore
-import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.android.ui.theme.AndroidTheme
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import androidx.room.Room
+import com.example.android.database.AppDatabase
+import com.example.android.database.entity.Group
+import com.example.android.database.entity.Student
+import kotlinx.coroutines.launch
 
-@Suppress("DEPRECATION")
-class MainActivity : ComponentActivity() {
-    private val cameraPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-        if (isGranted) {
-            openCamera()
-        } else {
-            Toast.makeText(this, "Camera permission denied. Cannot access camera.", Toast.LENGTH_SHORT).show()
-        }
-    }
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var db: AppDatabase
+    private lateinit var groupNameInput: EditText
+    private lateinit var studentNameInput: EditText
+    private lateinit var studentSurnameInput: EditText
+    private lateinit var studentAgeInput: EditText
+    private lateinit var studentGroupInput: EditText
+    private lateinit var studentList: TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        setContentView(R.layout.activity_main)
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-        } else {
-            openCamera()
+        db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "app-database").build()
+
+        groupNameInput = findViewById(R.id.group_name)
+        studentNameInput = findViewById(R.id.student_name)
+        studentSurnameInput = findViewById(R.id.student_surname)
+        studentAgeInput = findViewById(R.id.student_age)
+        studentGroupInput = findViewById(R.id.student_group)
+        studentList = findViewById(R.id.student_list)
+
+        findViewById<Button>(R.id.create_group_button).setOnClickListener {
+            val groupName = groupNameInput.text.toString()
+            lifecycleScope.launch {
+                db.groupDao().insertGroup(Group(name = groupName))
+            }
         }
 
-        setContent {
-            AndroidTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+        findViewById<Button>(R.id.add_student_button).setOnClickListener {
+            val name = studentNameInput.text.toString()
+            val surname = studentSurnameInput.text.toString()
+            val age = studentAgeInput.text.toString().toInt()
+            val groupId = studentGroupInput.text.toString().toInt()
+            lifecycleScope.launch {
+                db.studentDao().insertStudent(Student(name = name, surname = surname, age = age, groupId = groupId))
+            }
+        }
+
+        findViewById<Button>(R.id.show_students_button).setOnClickListener {
+            lifecycleScope.launch {
+                val students = db.studentDao().getAllStudents()
+                runOnUiThread {
+                    studentList.text = students.joinToString("\n") { "${it.name} ${it.surname}, Age: ${it.age}, Group: ${it.groupId}" }
                 }
             }
         }
-    }
-
-    @SuppressLint("QueryPermissionsNeeded")
-    private fun openCamera() {
-        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        if (cameraIntent.resolveActivity(packageManager) != null) {
-            startActivityForResult(cameraIntent, REQUEST_CODE_CAMERA)
-        }
-    }
-
-    companion object {
-        private const val REQUEST_CODE_CAMERA = 1001
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AndroidTheme {
-        Greeting("Android")
     }
 }
